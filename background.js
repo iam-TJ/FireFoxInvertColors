@@ -56,26 +56,31 @@ function setIconState(state) {
 
 function invertImg(tabId) {
     browser.tabs.insertCSS(tabId, {
-        file: "image.css"
+      file: "image.css",
+      allFrames: true
     });
+    
 }
 
 function revertImg(tabId) {
     browser.tabs.removeCSS(tabId, {
-        file: "image.css"
+      file: "image.css",
+      allFrames: true
     });
 }
 
 
 function invertColors(tabId) {
     browser.tabs.insertCSS(tabId, {
-        file: "style.css"
+      file: "style.css",
+      allFrames: false
     });
 }
 
 function revertColors(tabId) {
     browser.tabs.removeCSS(tabId, {
-        file: "style.css"
+      file: "style.css",
+      allFrames: false
     });
 }
 

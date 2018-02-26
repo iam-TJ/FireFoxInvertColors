@@ -55,11 +55,11 @@ function setIconState(state) {
 }
 
 function invertImg(tabId) {
+    console.log(`invertImg(${tabId})`);
     browser.tabs.insertCSS(tabId, {
       file: "image.css",
       allFrames: true
     });
-    
 }
 
 function revertImg(tabId) {
@@ -71,6 +71,7 @@ function revertImg(tabId) {
 
 
 function invertColors(tabId) {
+    console.log(`invertColors(${tabId})`);
     browser.tabs.insertCSS(tabId, {
       file: "style.css",
       allFrames: false

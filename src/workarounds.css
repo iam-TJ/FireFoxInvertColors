@@ -1,0 +1,4 @@
+/* Workaround for Firefox bug #1444198 in Layout Engine */
+body {
+  height: 100%;
+}

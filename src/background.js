@@ -3,16 +3,18 @@ function nullFunc() {
 
 function setColors(tabId) {
     browser.storage.local.get().then((res) => {
-        setColorsToState(tabId, res.InvertColorsState, res.ImgColorNoInvert);
+        setColorsToState(tabId, res.InvertColorsState, res.ImgColorNoInvert, res.Workarounds);
     });
 }
 
-function setColorsToState(tabId, state, imgNoInvert) {
+function setColorsToState(tabId, state, imgNoInvert, workarounds) {
     if (state == true) {
         invertColors(tabId);
+        if (workarounds) applyWorkarounds(tabId);
         if (imgNoInvert) invertImg(tabId);
     } else {
         revertImg(tabId);
+        revertWorkarounds(tabId);
         revertColors(tabId);
     }
     browser.sessions.setTabValue(tabId, "invertColors", state).then(nullFunc(), nullFunc());
@@ -25,7 +27,7 @@ function toggleColors(obj, tab) {
         browser.sessions.getTabValue(tab.id, "invertColors").then( tabState => {
           tabState = !tabState;
           browser.sessions.getTabValue(tab.id, "imgNoInvert").then( imgNoInvert => {
-            setColorsToState(tab.id, tabState, res.ImgColorNoInvert);
+            setColorsToState(tab.id, tabState, res.ImgColorNoInvert, res.Workarounds);
           }, nullFunc());
         }, nullFunc());
       } else {
@@ -33,13 +35,13 @@ function toggleColors(obj, tab) {
         state = obj != false ? !state : state;
         setIconState(state);
 
-        browser.storage.local.set({ InvertColorsState: state, ImgColorNoInvert: res.ImgColorNoInvert });
+        browser.storage.local.set({ InvertColorsState: state, ImgColorNoInvert: res.ImgColorNoInvert, Workarounds: res.Workarounds });
 
         browser.tabs.query({}).then((tabs) => {
             for (var tab of tabs) {
-                setColorsToState(tab.id, state, res.ImgColorNoInvert);
+                setColorsToState(tab.id, state, res.ImgColorNoInvert, res.Workarounds);
             };
-        });
+        }, nullFunc());
       }
     });
 }
@@ -79,6 +81,19 @@ function revertColors(tabId) {
     });
 }
 
+function applyWorkarounds(tabId) {
+  browser.tabs.insertCSS(tabId, {
+    file: "workarounds.css",
+    allFrames: false
+  });
+}
+
+function revertWorkarounds(tabId) {
+  browser.tabs.removeCSS(tabId, {
+    file: "workarounds.css",
+    allFrames: false
+  });
+}
 
 function handleUpdated(tabId, changeInfo, tabInfo) {
 
@@ -90,14 +105,14 @@ function handleUpdated(tabId, changeInfo, tabInfo) {
 function handleStorageUpdate(changes, area) {
     if (area == "local") {
         for (var item of Object.keys(changes)) {
-            if (item == "InvertColorsState" || item == "ImgColorNoInvert") {
+            if (item == "InvertColorsState" || item == "ImgColorNoInvert" || item == "Workarounds") {
                 browser.storage.local.get().then((res) => {
                     var state = res.InvertColorsState ? res.InvertColorsState : false;
                     setIconState(state);
 
                     browser.tabs.query({}).then((tabs) => {
                         for (var tab of tabs) {
-                            setColorsToState(tab.id, state, res.ImgColorNoInvert);
+                            setColorsToState(tab.id, state, res.ImgColorNoInvert, res.Workarounds);
                         };
                     });
                 });
